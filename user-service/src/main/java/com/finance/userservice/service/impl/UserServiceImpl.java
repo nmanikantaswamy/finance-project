@@ -7,6 +7,7 @@ import com.finance.userservice.exception.ResourceNotFoundException;
 import com.finance.userservice.repository.UserRepository;
 import com.finance.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-
+    private final PasswordEncoder passwordEncoder;
     @Override
     public UserResponse createUser(UserRequest request) {
 
@@ -31,7 +32,7 @@ public class UserServiceImpl implements UserService {
                 .lastName(request.getLastName())
                 .email(request.getEmail())
                 .phone(request.getPhone())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .role("USER")
                 .build();
 
@@ -76,7 +77,7 @@ public class UserServiceImpl implements UserService {
         user.setLastName(request.getLastName());
         user.setEmail(request.getEmail());
         user.setPhone(request.getPhone());
-        user.setPassword(request.getPassword());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         User updatedUser = userRepository.save(user);
 
