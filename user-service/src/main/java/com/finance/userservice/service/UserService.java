@@ -1,5 +1,7 @@
 package com.finance.userservice.service;
 
+import com.finance.userservice.dto.LoginRequest;
+import com.finance.userservice.dto.LoginResponse;
 import com.finance.userservice.dto.UserRequest;
 import com.finance.userservice.dto.UserResponse;
 
@@ -16,4 +18,6 @@ public interface UserService {
     UserResponse updateUser(Long id, UserRequest request);
 
     void deleteUser(Long id);
+
+    LoginResponse login(LoginRequest request);
 }

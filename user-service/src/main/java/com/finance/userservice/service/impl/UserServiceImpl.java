@@ -9,6 +9,11 @@ import com.finance.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.finance.userservice.dto.LoginRequest;
+import com.finance.userservice.dto.LoginResponse;
+import com.finance.userservice.util.JwtUtil;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -18,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
     @Override
     public UserResponse createUser(UserRequest request) {
 
@@ -108,6 +114,43 @@ public class UserServiceImpl implements UserService {
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .build();
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() ->
+                        new BadCredentialsException(
+                                "Invalid email or password"
+                        )
+                );
+
+        boolean passwordMatches =
+                passwordEncoder.matches(
+                        request.getPassword(),
+                        user.getPassword()
+                );
+
+        if (!passwordMatches) {
+            throw new BadCredentialsException(
+                    "Invalid email or password"
+            );
+        }
+
+        String token = jwtUtil.generateToken(
+                user.getId(),
+                user.getEmail(),
+                user.getRole()
+        );
+
+        return LoginResponse.builder()
+                .accessToken(token)
+                .tokenType("Bearer")
+                .userId(user.getId())
+                .email(user.getEmail())
+                .role(user.getRole())
                 .build();
     }
 }
