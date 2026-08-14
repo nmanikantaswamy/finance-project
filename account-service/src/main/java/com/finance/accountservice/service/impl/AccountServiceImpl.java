@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import com.finance.accountservice.exception.AccountAccessDeniedException;
+import com.finance.accountservice.exception.AccountNotFoundException;
 
 @Service
 @RequiredArgsConstructor
@@ -83,14 +85,14 @@ public class AccountServiceImpl implements AccountService {
         Account account =
                 accountRepository.findById(accountId)
                         .orElseThrow(() ->
-                                new RuntimeException(
-                                        "Account not found"
-                                )
+                            new AccountNotFoundException(
+                              "Account not found"
+                            )
                         );
 
         if (!account.getUserId().equals(userId)) {
 
-            throw new RuntimeException(
+            throw new AccountAccessDeniedException(
                     "You do not have access to this account"
             );
         }
@@ -107,14 +109,14 @@ public class AccountServiceImpl implements AccountService {
         Account account =
                 accountRepository.findById(accountId)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new AccountNotFoundException(
                                         "Account not found"
                                 )
                         );
 
         if (!account.getUserId().equals(userId)) {
 
-            throw new RuntimeException(
+            throw new AccountAccessDeniedException(
                     "You do not have access to this account"
             );
         }
@@ -137,14 +139,14 @@ public class AccountServiceImpl implements AccountService {
         Account account =
                 accountRepository.findById(accountId)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new AccountNotFoundException(
                                         "Account not found"
                                 )
                         );
 
         if (!account.getUserId().equals(userId)) {
 
-            throw new RuntimeException(
+            throw new AccountAccessDeniedException(
                     "You do not have access to this account"
             );
         }
