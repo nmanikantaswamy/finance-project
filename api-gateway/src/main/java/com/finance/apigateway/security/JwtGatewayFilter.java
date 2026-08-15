@@ -15,6 +15,8 @@ import reactor.core.publisher.Mono;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.http.server.reactive.ServerHttpRequest;
+
 @Component
 public class JwtGatewayFilter implements org.springframework.cloud.gateway.filter.GlobalFilter, Ordered {
 
@@ -73,11 +75,32 @@ public class JwtGatewayFilter implements org.springframework.cloud.gateway.filte
             String role =
                     claims.get("role", String.class);
 
-            if (email == null || role == null) {
+            Long userId =
+                    claims.get("userId", Long.class);
+
+            if (email == null || role == null || userId == null) {
                 return unauthorized(exchange);
             }
 
-            return chain.filter(exchange);
+            ServerHttpRequest request =
+                    exchange.getRequest()
+                            .mutate()
+                            .headers(headers -> {
+                                headers.remove("X-User-Id");
+
+                                headers.set(
+                                        "X-User-Id",
+                                        String.valueOf(userId)
+                                );
+                            })
+                            .build();
+
+            ServerWebExchange modifiedExchange =
+                    exchange.mutate()
+                            .request(request)
+                            .build();
+
+            return chain.filter(modifiedExchange);
 
         } catch (Exception exception) {
 
