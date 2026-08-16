@@ -4,6 +4,7 @@ import com.finance.accountservice.dto.AccountResponse;
 import com.finance.accountservice.dto.CreateAccountRequest;
 import com.finance.accountservice.dto.UpdateAccountRequest;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface AccountService {
@@ -31,5 +32,10 @@ public interface AccountService {
     void deleteAccount(
             Long userId,
             Long accountId
+    );
+    AccountResponse updateBalance(
+            Long userId,
+            Long accountId,
+            BigDecimal balance
     );
 }

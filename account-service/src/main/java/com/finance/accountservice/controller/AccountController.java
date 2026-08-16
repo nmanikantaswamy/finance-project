@@ -3,6 +3,7 @@ package com.finance.accountservice.controller;
 import com.finance.accountservice.dto.AccountResponse;
 import com.finance.accountservice.dto.CreateAccountRequest;
 import com.finance.accountservice.dto.UpdateAccountRequest;
+import com.finance.accountservice.dto.UpdateBalanceRequest;
 import com.finance.accountservice.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -88,5 +89,21 @@ public class AccountController {
         );
 
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{accountId}/balance")
+    public ResponseEntity<AccountResponse> updateBalance(
+            @RequestHeader("X-User-Id") Long userId,
+            @PathVariable Long accountId,
+            @RequestBody UpdateBalanceRequest request) {
+
+        AccountResponse response =
+                accountService.updateBalance(
+                        userId,
+                        accountId,
+                        request.getBalance()
+                );
+
+        return ResponseEntity.ok(response);
     }
 }

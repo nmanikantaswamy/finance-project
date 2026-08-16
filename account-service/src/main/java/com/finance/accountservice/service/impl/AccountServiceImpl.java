@@ -178,6 +178,42 @@ public class AccountServiceImpl implements AccountService {
         return accountNumber;
     }
 
+    @Override
+    public AccountResponse updateBalance(
+            Long userId,
+            Long accountId,
+            BigDecimal balance) {
+
+        Account account =
+                accountRepository.findById(accountId)
+                        .orElseThrow(() ->
+                                new AccountNotFoundException(
+                                        "Account not found"
+                                )
+                        );
+
+        if (!account.getUserId().equals(userId)) {
+
+            throw new AccountAccessDeniedException(
+                    "You do not have access to this account"
+            );
+        }
+
+        if (balance.compareTo(BigDecimal.ZERO) < 0) {
+
+            throw new IllegalArgumentException(
+                    "Account balance cannot be negative"
+            );
+        }
+
+        account.setBalance(balance);
+
+        Account updatedAccount =
+                accountRepository.save(account);
+
+        return mapToResponse(updatedAccount);
+    }
+
     private AccountResponse mapToResponse(
             Account account) {
 
