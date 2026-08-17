@@ -106,4 +106,12 @@ public class AccountController {
 
         return ResponseEntity.ok(response);
     }
+    @GetMapping("/internal/{accountId}")
+    public ResponseEntity<AccountResponse> getAccountInternal(
+            @PathVariable Long accountId) {
+
+        return ResponseEntity.ok(
+                accountService.getAccountInternal(accountId)
+        );
+    }
 }

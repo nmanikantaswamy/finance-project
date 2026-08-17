@@ -243,4 +243,17 @@ public class AccountServiceImpl implements AccountService {
                 )
                 .build();
     }
+    @Override
+    public AccountResponse getAccountInternal(Long accountId) {
+
+        Account account =
+                accountRepository.findById(accountId)
+                        .orElseThrow(() ->
+                                new AccountNotFoundException(
+                                        "Account not found"
+                                )
+                        );
+
+        return mapToResponse(account);
+    }
 }

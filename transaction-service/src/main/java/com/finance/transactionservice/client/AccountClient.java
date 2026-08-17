@@ -20,4 +20,9 @@ public interface AccountClient {
             @PathVariable("accountId") Long accountId,
             @RequestBody UpdateBalanceRequest request
     );
+
+    @GetMapping("/api/accounts/internal/{accountId}")
+    AccountClientResponse getAccountInternal(
+            @PathVariable("accountId") Long accountId
+    );
 }

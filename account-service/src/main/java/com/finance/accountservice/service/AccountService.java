@@ -38,4 +38,5 @@ public interface AccountService {
             Long accountId,
             BigDecimal balance
     );
+    AccountResponse getAccountInternal(Long accountId);
 }
