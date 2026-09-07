@@ -12,6 +12,8 @@ import com.finance.transactionservice.service.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.finance.transactionservice.kafka.TransactionEvent;
+import com.finance.transactionservice.kafka.TransactionEventProducer;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,6 +25,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountClient accountClient;
+    private final TransactionEventProducer transactionEventProducer;
 
     @Override
     @Transactional
@@ -140,9 +143,12 @@ public class TransactionServiceImpl implements TransactionService {
                         .description(request.getDescription())
                         .build();
 
-        return mapToResponse(
-                transactionRepository.save(transaction)
-        );
+        Transaction savedTransaction =
+                transactionRepository.save(transaction);
+
+        publishTransactionEvent(savedTransaction);
+
+        return mapToResponse(savedTransaction);
     }
 
     private TransactionResponse processWithdrawal(
@@ -199,9 +205,12 @@ public class TransactionServiceImpl implements TransactionService {
                         .description(request.getDescription())
                         .build();
 
-        return mapToResponse(
-                transactionRepository.save(transaction)
-        );
+        Transaction savedTransaction =
+                transactionRepository.save(transaction);
+
+        publishTransactionEvent(savedTransaction);
+
+        return mapToResponse(savedTransaction);
     }
 
     private TransactionResponse processTransfer(
@@ -286,9 +295,12 @@ public class TransactionServiceImpl implements TransactionService {
                         .description(request.getDescription())
                         .build();
 
-        return mapToResponse(
-                transactionRepository.save(transaction)
-        );
+        Transaction savedTransaction =
+                transactionRepository.save(transaction);
+
+        publishTransactionEvent(savedTransaction);
+
+        return mapToResponse(savedTransaction);
     }
 
     private String generateReference() {
@@ -319,5 +331,48 @@ public class TransactionServiceImpl implements TransactionService {
                 .description(transaction.getDescription())
                 .createdAt(transaction.getCreatedAt())
                 .build();
+    }
+
+    private void publishTransactionEvent(
+            Transaction transaction) {
+
+        TransactionEvent event =
+                TransactionEvent.builder()
+                        .transactionId(
+                                transaction.getId()
+                        )
+                        .transactionReference(
+                                transaction.getTransactionReference()
+                        )
+                        .userId(
+                                transaction.getUserId()
+                        )
+                        .accountId(
+                                transaction.getAccountId()
+                        )
+                        .type(
+                                transaction.getType()
+                        )
+                        .amount(
+                                transaction.getAmount()
+                        )
+                        .balanceAfter(
+                                transaction.getBalanceAfter()
+                        )
+                        .currency(
+                                transaction.getCurrency()
+                        )
+                        .status(
+                                transaction.getStatus().name()
+                        )
+                        .description(
+                                transaction.getDescription()
+                        )
+                        .createdAt(
+                                transaction.getCreatedAt()
+                        )
+                        .build();
+
+        transactionEventProducer.publish(event);
     }
 }
