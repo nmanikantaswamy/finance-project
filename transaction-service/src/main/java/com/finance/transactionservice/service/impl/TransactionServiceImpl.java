@@ -1,12 +1,12 @@
 package com.finance.transactionservice.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.finance.transactionservice.client.AccountClient;
 import com.finance.transactionservice.client.dto.AccountClientResponse;
 import com.finance.transactionservice.dto.CreateTransactionRequest;
 import com.finance.transactionservice.dto.TransactionResponse;
-import com.finance.transactionservice.entity.Transaction;
-import com.finance.transactionservice.entity.TransactionStatus;
-import com.finance.transactionservice.entity.TransactionType;
+import com.finance.transactionservice.entity.*;
+import com.finance.transactionservice.repository.OutboxEventRepository;
 import com.finance.transactionservice.repository.TransactionRepository;
 import com.finance.transactionservice.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,7 @@ import com.finance.transactionservice.kafka.TransactionEvent;
 import com.finance.transactionservice.kafka.TransactionEventProducer;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +26,10 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountClient accountClient;
-    private final TransactionEventProducer transactionEventProducer;
+    //private final TransactionEventProducer transactionEventProducer;
+
+    private final OutboxEventRepository outboxEventRepository;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -146,7 +150,8 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction savedTransaction =
                 transactionRepository.save(transaction);
 
-        publishTransactionEvent(savedTransaction);
+        //publishTransactionEvent(savedTransaction);
+        createOutboxEvent(savedTransaction);
 
         return mapToResponse(savedTransaction);
     }
@@ -207,8 +212,8 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction =
                 transactionRepository.save(transaction);
-
-        publishTransactionEvent(savedTransaction);
+        // publishTransactionEvent(savedTransaction);
+        createOutboxEvent(savedTransaction);
 
         return mapToResponse(savedTransaction);
     }
@@ -298,7 +303,8 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction savedTransaction =
                 transactionRepository.save(transaction);
 
-        publishTransactionEvent(savedTransaction);
+        // publishTransactionEvent(savedTransaction);
+        createOutboxEvent(savedTransaction);
 
         return mapToResponse(savedTransaction);
     }
@@ -333,7 +339,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .build();
     }
 
-    private void publishTransactionEvent(
+    /*private void publishTransactionEvent(
             Transaction transaction) {
 
         TransactionEvent event =
@@ -374,5 +380,76 @@ public class TransactionServiceImpl implements TransactionService {
                         .build();
 
         transactionEventProducer.publish(event);
+    }*/
+
+    private void createOutboxEvent(
+            Transaction transaction) {
+
+        try {
+
+            TransactionEvent event =
+                    TransactionEvent.builder()
+                            .transactionId(
+                                    transaction.getId()
+                            )
+                            .transactionReference(
+                                    transaction.getTransactionReference()
+                            )
+                            .userId(
+                                    transaction.getUserId()
+                            )
+                            .accountId(
+                                    transaction.getAccountId()
+                            )
+                            .type(
+                                    transaction.getType()
+                            )
+                            .amount(
+                                    transaction.getAmount()
+                            )
+                            .balanceAfter(
+                                    transaction.getBalanceAfter()
+                            )
+                            .currency(
+                                    transaction.getCurrency()
+                            )
+                            .status(
+                                    transaction.getStatus().name()
+                            )
+                            .description(
+                                    transaction.getDescription()
+                            )
+                            .createdAt(
+                                    transaction.getCreatedAt()
+                            )
+                            .build();
+
+            String payload =
+                    objectMapper.writeValueAsString(event);
+
+            OutboxEvent outboxEvent =
+                    OutboxEvent.builder()
+                            .aggregateType("TRANSACTION")
+                            .aggregateId(transaction.getId())
+                            .eventType("TRANSACTION_COMPLETED")
+                            .eventKey(
+                                    transaction
+                                            .getTransactionReference()
+                            )
+                            .payload(payload)
+                            .status(OutboxStatus.PENDING)
+                            .createdAt(LocalDateTime.now())
+                            .retryCount(0)
+                            .build();
+
+            outboxEventRepository.save(outboxEvent);
+
+        } catch (Exception exception) {
+
+            throw new RuntimeException(
+                    "Failed to create outbox event",
+                    exception
+            );
+        }
     }
 }
