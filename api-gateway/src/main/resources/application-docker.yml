@@ -1,0 +1,61 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  config:
+    import: optional:configserver:http://config-server:8888
+
+  cloud:
+    gateway:
+      routes:
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: account-service
+          uri: lb://ACCOUNT-SERVICE
+          predicates:
+            - Path=/account-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: transaction-service
+          uri: lb://TRANSACTION-SERVICE
+          predicates:
+            - Path=/transaction-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: audit-service
+          uri: lb://AUDIT-SERVICE
+          predicates:
+            - Path=/audit-service/**
+          filters:
+            - StripPrefix=1
+
+        - id: reporting-service
+          uri: lb://REPORTING-SERVICE
+          predicates:
+            - Path=/reporting-service/**
+          filters:
+            - StripPrefix=1
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
+
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: "finance-project-super-secret-key-2026-this-must-be-long"

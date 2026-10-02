@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: transaction-service
+
+  config:
+    import: optional:configserver:http://config-server:8888
+
+  datasource:
+    url: jdbc:mysql://mysql-transaction:3306/transaction_db
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  kafka:
+    bootstrap-servers: kafka:9092
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+server:
+  port: 8083
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka

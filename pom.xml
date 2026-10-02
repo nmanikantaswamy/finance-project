@@ -18,6 +18,12 @@
         <module>config-server</module>
         <module>discovery-server</module>
         <module>api-gateway</module>
+        <module>user-service</module>
+        <module>account-service</module>
+        <module>transaction-service</module>
+        <module>notification-service</module>
+        <module>audit-service</module>
+        <module>reporting-service</module>
     </modules>
 
     <properties>
@@ -49,5 +55,26 @@
         </dependencies>
 
     </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
 
 </project>

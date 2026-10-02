@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: reporting-service
+
+  config:
+    import: optional:configserver:http://config-server:8888
+
+  datasource:
+    url: jdbc:mysql://mysql-reporting:3306/reporting_db
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+  kafka:
+    bootstrap-servers: kafka:9092
+
+    consumer:
+      group-id: reporting-service-group
+      auto-offset-reset: earliest
+
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+server:
+  port: 8086
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka

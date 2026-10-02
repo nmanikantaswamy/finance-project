@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: account-service
+
+  config:
+    import: optional:configserver:http://config-server:8888
+
+  datasource:
+    url: jdbc:mysql://mysql-account:3306/account_db
+    username: root
+    password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+
+server:
+  port: 8082
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka
