@@ -2,16 +2,20 @@ server:
   port: 8081
 
 spring:
-  application:
-    name: user-service
-
-  config:
-    import: optional:configserver:http://config-server:8888
-
   datasource:
-    url: jdbc:mysql://mysql-user:3306/user_db
+    url: jdbc:mysql://mysql-user:3306/finance_user_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
     username: root
     password: root
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+    show-sql: true
+
+    properties:
+      hibernate:
+        format_sql: true
 
 eureka:
   client:
@@ -22,3 +26,13 @@ eureka:
 
   instance:
     prefer-ip-address: true
+
+jwt:
+  secret: "finance-project-super-secret-key-2026-this-must-be-long"
+  expiration: 86400000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

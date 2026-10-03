@@ -10,9 +10,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: user_db
+      MYSQL_DATABASE: finance_user_db
     ports:
-      - "3306:3306"
+      - "3311:3306"
     volumes:
       - mysql-user-data:/var/lib/mysql
     networks:
